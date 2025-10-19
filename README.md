@@ -1,166 +1,180 @@
-# Portfolio Overview - Implementation Summary
+# FinancialOverview
 
 ## Overview
-A comprehensive iOS portfolio tracking application built with SwiftUI that supports multiple asset classes including cryptocurrencies, ETFs, stocks, precious metals, and other financial instruments. The app provides real-time price updates, interactive visualizations, and portfolio analytics with a dark theme design.
+A SwiftUI-based iOS portfolio tracking application that helps users manage and monitor their financial assets across multiple categories including cryptocurrencies, stocks, ETFs, and raw materials. The app provides real-time price updates, portfolio analytics, and data management features with a modern dark theme interface.
 
 ## ✅ Implemented Features
 
 ### 📱 User Interface
-- **Three-tab interface**: Portfolio, Distribution, Settings
-- **Dark theme design** with cyan accent color
-- **Material design** with `.ultraThinMaterial` backgrounds
-- **Responsive layout** that adapts to different screen sizes
+- **Two-tab interface**: Overview and Settings
+- **Dark theme design** with gradient accents and modern styling
+- **Responsive layout** with smart decimal formatting for asset amounts
 - **Pull-to-refresh** functionality for manual price updates
-- **Empty states** with helpful guidance
+- **Expandable sections** for better organization
 
-### 📊 Portfolio Tab
-- **Total portfolio value display** with gradient background
-- **Asset categorization** (ETF, Shares, Cryptos, Raw Materials, Other)
-- **Expandable category sections** with total values and percentages
-- **Individual asset rows** with quantity, price, and total value
-- **Add asset functionality** with comprehensive asset form
-- **Context menu** for asset removal
-- **Loading indicators** during async operations
-
-### 📈 Distribution Tab
-- **Interactive pie chart** visualization showing portfolio allocation
-- **Donut chart design** with center total value display
-- **Tappable segments** for asset selection highlighting
-- **Category breakdown** with asset counts and percentages
-- **Individual asset details** with color-coded indicators
-- **Predefined color palette** for visual consistency
+### 📊 Overview Tab
+- **Total portfolio value display** with prominent gradient styling
+- **Asset categorization** by class (Raw Materials, Cryptocurrencies, Stocks, ETFs)
+- **Expandable asset class sections** showing totals, percentages, and individual assets
+- **Asset management** with tap-to-edit functionality
+- **Add new assets** with comprehensive form
+- **Delete assets** with swipe-to-delete gesture
+- **Visual indicators** with appropriate icons for each asset class
 
 ### ⚙️ Settings Tab
-- **Currency selection** (USD/EUR) with segmented control
-- **Portfolio statistics** display
-- **Refresh all prices** functionality
-- **Clear all data** option
-- **App information** and data source credits
-- **Persistent storage** of user preferences
+- **Currency selection** (USD/EUR) with segmented picker
+- **CSV Import/Export** functionality for portfolio data
+- **Version information** display
+- **Data management** with file picker integration
 
-### 🏗️ Data Management
-- **Local persistence** using UserDefaults with Base64 encoding
-- **Automatic data migration** support
-- **Real-time updates** with async/await patterns
-- **Error handling** with user-friendly alerts
-- **MVVM architecture** with clean separation of concerns
+### 🏗️ Data Architecture
+- **Local persistence** using UserDefaults with JSON encoding
+- **MVVM architecture** with Observable view models
+- **Real-time updates** using async/await patterns
+- **Automatic data merging** for duplicate assets during import
+- **Sample data** provided for new users
 
-### 💰 Asset Support
-- **Multiple identifier types**: Symbol, ISIN, WKN, Coin ID
-- **Auto-detection** of identifier types based on format
-- **Comprehensive asset categories** with custom icons
-- **Quantity tracking** with precise decimal support
-- **Price history** with last updated timestamps
+### 💰 Asset Management
+- **Four asset classes** supported:
+  - Raw Materials (e.g., Gold - XAU, Silver - XAG)
+  - Cryptocurrencies (e.g., BTC, ETH)
+  - Stocks (using ISIN codes)
+  - ETFs (using ISIN codes)
+- **Flexible quantity tracking** with smart decimal display
+- **Real-time price fetching** from multiple API sources
+- **Asset deduplication** when adding existing assets
 
-### 🌐 API Integrations
-#### CoinGecko API Client
-- **Cryptocurrency price data** and symbol resolution
-- **Market cap ranking** prioritization
-- **Coin search** with exact symbol matching
+### 🌐 API Integration
+- **CryptoCompare API** for cryptocurrency prices
+- **JustETF API** for ETF and stock pricing via ISIN
+- **SwissQuote API** for raw material prices
+- **Multi-currency support** (USD/EUR)
+- **Error-resilient** network requests with proper error handling
 
-#### JustETF API Client  
-- **ISIN-based ETF pricing** (12-character codes)
-- **European and international ETF support**
-- **Mock implementation** ready for real API integration
-
-#### MetalsPriceClient
-- **Precious metals pricing** (Gold - XAU, Silver - XAG)
-- **Real-time USD prices** for commodity assets
-- **Mock implementation** with realistic price simulation
-
-#### ETFPriceClient (Yahoo Finance)
-- **WKN-based ETF resolution** (6-character codes)
-- **Ticker resolution** and price fetching
-- **Mock implementation** for development
-
-#### FinnhubClient
-- **Asset metadata** and company information
-- **ISIN validation** functionality
-- **Mock profiles** for development
-
-#### ExchangeRateService
-- **USD to EUR conversion** and vice versa
-- **Real-time exchange rates** (mock implementation)
-- **Currency conversion** for multi-currency support
+### 📊 Data Import/Export
+- **CSV Export** with proper formatting and quotes
+- **CSV Import** with validation and error handling
+- **Duplicate handling** during import (merges quantities)
+- **File picker integration** for iOS document handling
 
 ### 🛠️ Technical Implementation
-- **SwiftUI** with modern declarative UI patterns
-- **Combine framework** for reactive programming
+- **SwiftUI** with modern @Observable pattern
 - **Async/await** for all network operations
-- **Type safety** with strong typing and enums
-- **Error resilience** with graceful failure handling
-- **Memory management** with proper lifecycle handling
-
-### 📱 User Experience
-- **Loading states** with progress indicators
-- **Error handling** with informative alert dialogs
-- **Haptic feedback** for standard iOS interactions
-- **Accessibility support** with proper labels
-- **Intuitive navigation** with standard iOS patterns
-- **Form validation** with real-time feedback
-
-### 🧪 Testing Infrastructure
-- **Comprehensive unit tests** for all major components
-- **Model testing** with Codable verification
-- **API client testing** with mock implementations
-- **Service layer testing** with async operations
-- **View model testing** with state management verification
-- **Data persistence testing** with UserDefaults integration
+- **Type-safe** models with Codable support
+- **Error handling** throughout the application
+- **iOS 17+** compatibility with latest SwiftUI features
 
 ## 📁 Project Structure
 
 ```
-PortfolioOverview/
+FinancialOverview/
+├── FinancialOverviewApp.swift     # App entry point
+├── ContentView.swift              # Main tab container
 ├── Models/
-│   ├── Asset.swift          # Core data models
-│   └── Currency.swift       # Currency and exchange rate models
+│   ├── Asset.swift                # Core asset data model
+│   ├── AssetClass.swift           # Asset category enumeration
+│   └── Currency.swift             # Currency enumeration
 ├── Services/
-│   ├── CoinGeckoClient.swift      # Cryptocurrency API client
-│   ├── JustETFClient.swift        # ETF pricing client
-│   ├── MetalsPriceClient.swift    # Precious metals client
-│   ├── ETFPriceClient.swift       # Yahoo Finance client
-│   ├── FinnhubClient.swift        # Asset metadata client
-│   ├── ExchangeRateService.swift  # Currency conversion
-│   ├── PriceService.swift         # Unified pricing service
-│   └── DataService.swift          # Local data persistence
+│   └── APIService.swift           # Network service for price fetching
 ├── ViewModels/
-│   └── PortfolioViewModel.swift   # Main app state management
-├── Views/
-│   ├── PortfolioView.swift        # Main portfolio interface
-│   ├── DistributionView.swift     # Pie chart visualization
-│   ├── SettingsView.swift         # App configuration
-│   └── AddAssetView.swift         # Asset creation form
-├── ContentView.swift              # Tab container
-└── PortfolioOverviewApp.swift     # App entry point
+│   └── AssetViewModel.swift       # Main app state management
+└── Views/
+    ├── OverviewView.swift         # Portfolio overview interface
+    ├── SettingsView.swift         # Settings and data management
+    └── AssetEditView.swift        # Asset creation/editing form
 ```
 
 ## 🚀 Build & Run Instructions
 
-1. **Open the project** in Xcode 15.0+
-2. **Select target device**: iPhone simulator (iOS 18.5+)
-3. **Build the project**: ⌘+B
-4. **Run the app**: ⌘+R
+### Using Xcode (Recommended)
+1. Open `FinancialOverview.xcodeproj` in Xcode 15.0+
+2. Select your target device (iPhone simulator or physical device)
+3. Build and run: ⌘+R
 
-The app includes mock API implementations that provide realistic data for development and testing purposes.
+### Using Command Line
+The project includes automated deployment scripts:
+
+**For iOS Simulator:**
+```bash
+./deploy_to_simulator.sh
+```
+
+**For Physical iPhone:**
+```bash
+./deploy_to_iphone.sh
+```
+
+**Build and Install Script:**
+```bash
+./build_and_install.sh
+```
+
+## 🧪 Testing
+
+The project includes API testing functionality:
+
+**Run API Tests:**
+```bash
+./test_api_services.sh
+```
+
+Or compile and run the test runner:
+```bash
+swift APIServiceTests.swift
+```
+
+## � Data Management
+
+### CSV Format
+The app supports CSV import/export with the following format:
+```csv
+Asset Class,Code,Name,Amount
+"Cryptocurrencies","BTC","Bitcoin",0.5
+"Stocks","US0378331005","Apple",100
+"ETFs","IE00B5BMR087","iShares Core MSCI World",50
+"Raw Materials","XAU","Gold",2
+```
+
+### Sample Data
+New installations include sample data:
+- Bitcoin (0.5 BTC)
+- Ethereum (10 ETH)
+- Apple Stock (100 shares)
+- iShares Core MSCI World ETF (50 shares)
+- Gold (2 ounces)
 
 ## 🔮 Future Enhancements
 
-- **Real API integration** with proper authentication
-- **Portfolio performance analytics** with charts
-- **Push notifications** for price alerts
-- **Data export** functionality
-- **More asset types** and exchanges
-- **Advanced filtering** and search
-- **Portfolio sharing** capabilities
-- **Watchlist** functionality
+- **Advanced portfolio analytics** with performance charts
+- **Price alerts** and notifications
+- **More asset classes** (bonds, real estate, etc.)
+- **Portfolio diversification analysis**
+- **Historical price charts**
+- **Advanced filtering and search**
+- **Cloud sync** capabilities
+- **Multiple portfolio support**
 
-## 📋 Development Notes
+## �️ Development Setup
 
-- All API clients are designed for easy replacement when real APIs are available
-- Mock implementations provide consistent, deterministic data for testing
-- The architecture supports easy extension for new asset types and data sources
-- Currency conversion is ready for integration with real exchange rate APIs
-- Error handling is comprehensive and user-friendly
-- The app follows iOS design guidelines and accessibility standards
+### Requirements
+- Xcode 15.0 or later
+- iOS 17.0 or later
+- Swift 5.9 or later
 
-The implementation provides a solid foundation for a professional portfolio tracking application with room for future enhancements and real API integrations.
+### API Configuration
+The app currently uses public APIs:
+- **CryptoCompare**: No API key required for basic usage
+- **JustETF**: Public API endpoints
+- **SwissQuote**: Public quotes endpoint
+
+For production use, consider implementing proper API authentication and rate limiting.
+
+## 📋 Architecture Notes
+
+- **Reactive UI**: Uses SwiftUI's @Observable for automatic UI updates
+- **Error Resilience**: Graceful handling of network failures
+- **Data Persistence**: UserDefaults for simplicity, easily extensible to Core Data
+- **Modular Design**: Clear separation between models, views, and services
+- **iOS Guidelines**: Follows Apple's Human Interface Guidelines
+
+The app provides a solid foundation for personal portfolio tracking with room for advanced features and enterprise-grade enhancements.
