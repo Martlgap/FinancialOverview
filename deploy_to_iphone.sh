@@ -1,27 +1,15 @@
 #!/bin/bash
 
-<<<<<<< HEAD
-# Deploy PortfolioOverview app to iPhone
-=======
 # Deploy FinancialOverview app to iPhone
->>>>>>> fdb7472 (Working State)
 # Make sure your iPhone is connected and trusted
 
 DEVICE_ID="00008110-0012031C1110401E"
 
-<<<<<<< HEAD
-echo "🏗️ Building PortfolioOverview for iPhone..."
-
-# Build the project for iPhone
-xcodebuild -project PortfolioOverview.xcodeproj \
-           -scheme PortfolioOverview \
-=======
 echo "🏗️ Building FinancialOverview for iPhone..."
 
 # Build the project for iPhone
 xcodebuild -project FinancialOverview.xcodeproj \
            -scheme FinancialOverview \
->>>>>>> fdb7472 (Working State)
            -destination "platform=iOS,id=$DEVICE_ID" \
            -configuration Debug \
            build
