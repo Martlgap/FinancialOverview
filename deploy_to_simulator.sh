@@ -4,7 +4,7 @@
 # This script will build and install the app on the iOS Simulator
 
 SIMULATOR_NAME="iPhone SE"
-OS_VERSION="18.6"
+OS_VERSION="26.0"
 
 echo "🏗️ Building FinancialOverview for iOS Simulator..."
 
