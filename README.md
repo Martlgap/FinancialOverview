@@ -104,11 +104,6 @@ The project includes automated deployment scripts:
 ./deploy_to_iphone.sh
 ```
 
-**Build and Install Script:**
-```bash
-./build_and_install.sh
-```
-
 ## 🧪 Testing
 
 The project includes API testing functionality:

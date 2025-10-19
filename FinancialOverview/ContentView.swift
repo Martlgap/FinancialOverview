@@ -7,7 +7,12 @@ struct ContentView: View {
         TabView {
             OverviewView(viewModel: assetViewModel)
                 .tabItem {
-                    Label("Overview", systemImage: "chart.pie")
+                    Label("Overview", systemImage: "list.bullet.clipboard")
+                }
+
+            DistributionView(viewModel: assetViewModel)
+                .tabItem {
+                    Label("Distribution", systemImage: "chart.pie")
                 }
 
             SettingsView(viewModel: assetViewModel)

@@ -1,1 +1,0 @@
-xcodebuild -project PortfolioOverview.xcodeproj -scheme PortfolioOverview -destination 'platform=iOS Simulator,name=iPhone SE,OS=18.6' build && xcrun simctl install "iPhone SE" ~/Library/Developer/Xcode/DerivedData/PortfolioOverview-axycpsnnawmogygxvgpnjlrywwqw/Build/Products/Debug-iphonesimulator/PortfolioOverview.app
