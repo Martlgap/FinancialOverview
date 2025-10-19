@@ -15,6 +15,11 @@ struct ContentView: View {
                     Label("Distribution", systemImage: "chart.pie")
                 }
 
+            PlansView(viewModel: assetViewModel)
+                .tabItem {
+                    Label("Plans", systemImage: "target")
+                }
+
             SettingsView(viewModel: assetViewModel)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
