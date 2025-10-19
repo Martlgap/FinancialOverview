@@ -23,8 +23,20 @@ struct AssetEditView: View {
             assetClass: .cryptocurrencies,
             code: "",
             name: "",
-            amount: 0
+            amount: 0,
+            category: .mediumRisk
         ))
+    }
+    
+    private func colorForCategory(_ category: AssetCategory) -> Color {
+        switch category {
+        case .highRisk:
+            return .red
+        case .mediumRisk:
+            return .orange
+        case .lowRisk:
+            return .green
+        }
     }
 
     var body: some View {
@@ -34,6 +46,16 @@ struct AssetEditView: View {
                     Picker("Asset Class", selection: $asset.assetClass) {
                         ForEach(AssetClass.allCases, id: \.self) {
                             Text($0.rawValue)
+                        }
+                    }
+                    Picker("Risk Category", selection: $asset.category) {
+                        ForEach(AssetCategory.allCases, id: \.self) { category in
+                            HStack {
+                                Image(systemName: category.iconName)
+                                    .foregroundColor(colorForCategory(category))
+                                Text(category.rawValue)
+                            }
+                            .tag(category)
                         }
                     }
                     TextField("Name", text: $asset.name)

@@ -2,6 +2,11 @@ import SwiftUI
 
 struct OverviewView: View {
     
+    enum ViewMode: String, CaseIterable {
+        case assetClass = "Asset Class"
+        case riskCategory = "Risk Category"
+    }
+    
     // Helper function to format asset amounts with smart decimal handling
     private func formatAssetAmount(_ amount: Double) -> String {
         if amount == floor(amount) {
@@ -14,9 +19,11 @@ struct OverviewView: View {
     }
     var viewModel: AssetViewModel
     @State private var expandedAssetClasses: Set<AssetClass> = []
+    @State private var expandedRiskCategories: Set<AssetCategory> = []
     @State private var showingAssetEditView = false
     @State private var selectedAsset: Asset?
     @State private var showingNewAssetView = false
+    @State private var viewMode: ViewMode = .assetClass
 
     var body: some View {
         NavigationView {
@@ -36,8 +43,18 @@ struct OverviewView: View {
                 List {
                     totalSumSection
                     
-                    ForEach(AssetClass.allCases) { assetClass in
-                        assetClassSection(assetClass)
+                    // Toggle section
+                    viewModeToggleSection
+                    
+                    // Display sections based on selected mode
+                    if viewMode == .assetClass {
+                        ForEach(AssetClass.allCases) { assetClass in
+                            assetClassSection(assetClass)
+                        }
+                    } else {
+                        ForEach(AssetCategory.allCases) { riskCategory in
+                            riskCategorySection(riskCategory)
+                        }
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -99,11 +116,36 @@ struct OverviewView: View {
                             endPoint: .bottomTrailing
                         )
                     )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.blue, .cyan, .teal],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ),
+                                lineWidth: 0.5
+                            )
+                    )
                     .shadow(color: .cyan.opacity(0.2), radius: 8, x: 0, y: 4)
             )
         }
         .listRowBackground(Color.clear)
-        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 0, trailing: 16))
+    }
+    
+    private var viewModeToggleSection: some View {
+        Section {
+            Picker("View Mode", selection: $viewMode) {
+                ForEach(ViewMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.vertical, 8)
+        }
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets(top: -8, leading: 16, bottom: 4, trailing: 16))
     }
 
     private func assetClassSection(_ assetClass: AssetClass) -> some View {
@@ -158,6 +200,95 @@ struct OverviewView: View {
             }
         )
     }
+    
+    private func riskCategorySection(_ riskCategory: AssetCategory) -> some View {
+        let assets = viewModel.assets(for: riskCategory)
+
+        return AnyView(
+            Section {
+                DisclosureGroup(
+                    isExpanded: Binding(
+                        get: { expandedRiskCategories.contains(riskCategory) },
+                        set: { isExpanded in
+                            if isExpanded {
+                                expandedRiskCategories.insert(riskCategory)
+                            } else {
+                                expandedRiskCategories.remove(riskCategory)
+                            }
+                        }
+                    ),
+                    content: {
+                        if assets.isEmpty {
+                            Text("No assets")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.vertical, 8)
+                        } else {
+                            ForEach(assets) { asset in
+                                assetRow(asset)
+                                    .onTapGesture {
+                                        selectedAsset = asset
+                                    }
+                            }
+                            .onDelete { indexSet in
+                                let assetsToDelete = indexSet.map { assets[$0] }
+                                for asset in assetsToDelete {
+                                    if let index = viewModel.assets.firstIndex(where: { $0.id == asset.id }) {
+                                        viewModel.deleteAsset(at: IndexSet(integer: index))
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    label: {
+                        riskCategoryHeader(riskCategory)
+                    }
+                )
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemBackground).opacity(0.8))
+                        .shadow(color: .gray.opacity(0.1), radius: 2, x: 0, y: 1)
+                )
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+            }
+        )
+    }
+    
+    private func riskCategoryHeader(_ riskCategory: AssetCategory) -> some View {
+        HStack {
+            HStack(spacing: 8) {
+                Image(systemName: riskCategory.iconName)
+                    .font(.title2)
+                    .foregroundColor(colorForCategory(riskCategory))
+                    .frame(width: 24, height: 24)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(riskCategory.rawValue)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    Text("\(viewModel.assets(for: riskCategory).count) Assets")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("\(viewModel.sum(for: riskCategory), specifier: "%.2f") \(viewModel.selectedCurrency.rawValue)")
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                Text("\(viewModel.percentage(for: riskCategory), specifier: "%.1f")%")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(colorForCategory(riskCategory).opacity(0.8))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(colorForCategory(riskCategory).opacity(0.1))
+                    .clipShape(Capsule())
+            }
+        }
+        .padding(.vertical, 2)
+    }
 
     private func assetClassHeader(_ assetClass: AssetClass) -> some View {
         HStack {
@@ -198,9 +329,19 @@ struct OverviewView: View {
     private func assetRow(_ asset: Asset) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(asset.name)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                HStack(spacing: 6) {
+                    Text(asset.name)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                    
+                    // Only show category icon when viewing by Asset Class
+                    if viewMode == .assetClass {
+                        Image(systemName: asset.category.iconName)
+                            .font(.caption)
+                            .foregroundColor(colorForCategory(asset.category))
+                            .help(asset.category.rawValue)
+                    }
+                }
                 Text("\(formatAssetAmount(asset.amount)) units")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -232,6 +373,17 @@ struct OverviewView: View {
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())
+    }
+    
+    private func colorForCategory(_ category: AssetCategory) -> Color {
+        switch category {
+        case .highRisk:
+            return .red
+        case .mediumRisk:
+            return .orange
+        case .lowRisk:
+            return .green
+        }
     }
     
     private func iconForAssetClass(_ assetClass: AssetClass) -> String {
