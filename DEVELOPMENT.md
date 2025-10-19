@@ -21,17 +21,17 @@ open -a Simulator --args -CurrentDeviceUDID E48587B5-1D7D-4D30-BD82-9BEC32AD232D
 
 3. Build for ios Simulator:
 ```shell
-xcodebuild -project PortfolioOverview.xcodeproj -scheme PortfolioOverview -destination 'platform=iOS Simulator,name=iPhone SE,OS=18.6' build
+xcodebuild -project FinancialOverview.xcodeproj -scheme FinancialOverview -destination 'platform=iOS Simulator,name=iPhone SE,OS=26.0' build
 ```
 
 3. Install on Simulator:
 ```shell
-xcrun simctl install "iPhone SE" ~/Library/Developer/Xcode/DerivedData/PortfolioOverview-axycpsnnawmogygxvgpnjlrywwqw/Build/Products/Debug-iphonesimulator/PortfolioOverview.app
+xcrun simctl install "iPhone SE" ~/Library/Developer/Xcode/DerivedData/FinancialOverview-axycpsnnawmogygxvgpnjlrywwqw/Build/Products/Debug-iphonesimulator/FinancialOverview.app
 ```
 
 4. Launch on Simulator:
 ```shell
-xcrun simctl launch "iPhone SE" MK.PortfolioOverview
+xcrun simctl launch "iPhone SE" MK.FinancialOverview
 ```
 
 ### For Physical iPhone Device:
@@ -49,10 +49,10 @@ xcrun simctl launch "iPhone SE" MK.PortfolioOverview
 
 2. Build for iPhone:
    ```shell
-   xcodebuild -project PortfolioOverview.xcodeproj -scheme PortfolioOverview -destination 'platform=iOS,id=00008110-0012031C1110401E' -configuration Debug build
+   xcodebuild -project FinancialOverview.xcodeproj -scheme FinancialOverview -destination 'platform=iOS,id=00008110-0012031C1110401E' -configuration Debug build
    ```
 
 3. Install on iPhone:
    ```shell
-   xcrun devicectl device install app --device 00008110-0012031C1110401E "/Users/martinknoche/Library/Developer/Xcode/DerivedData/PortfolioOverview-axycpsnnawmogygxvgpnjlrywwqw/Build/Products/Debug-iphoneos/PortfolioOverview.app"
+   xcrun devicectl device install app --device 00008110-0012031C1110401E "/Users/martinknoche/Library/Developer/Xcode/DerivedData/FinancialOverview-axycpsnnawmogygxvgpnjlrywwqw/Build/Products/Debug-iphoneos/FinancialOverview.app"
    ```

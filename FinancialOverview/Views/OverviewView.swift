@@ -20,7 +20,6 @@ struct OverviewView: View {
     var viewModel: AssetViewModel
     @State private var expandedAssetClasses: Set<AssetClass> = []
     @State private var expandedRiskCategories: Set<AssetCategory> = []
-    @State private var showingAssetEditView = false
     @State private var selectedAsset: Asset?
     @State private var showingNewAssetView = false
     @State private var viewMode: ViewMode = .assetClass
