@@ -1,9 +1,9 @@
 import Foundation
 
 enum AssetCategory: String, CaseIterable, Codable, Identifiable {
-    case highRisk = "High Risk"
-    case mediumRisk = "Medium Risk"
-    case lowRisk = "Low Risk"
+    case highRisk = "High"
+    case mediumRisk = "Medium"
+    case lowRisk = "Low"
 
     var id: String { self.rawValue }
     

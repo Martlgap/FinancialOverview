@@ -48,7 +48,7 @@ struct AssetEditView: View {
                             Text($0.rawValue)
                         }
                     }
-                    Picker("Risk Category", selection: $asset.category) {
+                    Picker("Risk Class", selection: $asset.category) {
                         ForEach(AssetCategory.allCases, id: \.self) { category in
                             HStack {
                                 Image(systemName: category.iconName)

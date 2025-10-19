@@ -4,7 +4,7 @@ struct OverviewView: View {
     
     enum ViewMode: String, CaseIterable {
         case assetClass = "Asset Class"
-        case riskCategory = "Risk Category"
+        case riskCategory = "Risk Class"
     }
     
     // Helper function to format asset amounts with smart decimal handling
@@ -61,7 +61,16 @@ struct OverviewView: View {
                 .navigationTitle("Portfolio")
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        if viewModel.privacyModeManager.isPrivacyModeEnabled {
+                            Button(action: {
+                                viewModel.privacyModeManager.toggleValuesVisibility()
+                            }) {
+                                Image(systemName: viewModel.privacyModeManager.isValuesCurrentlyHidden ? "eye.slash" : "eye")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        
                         Button(action: {
                             showingNewAssetView = true
                         }) {
@@ -94,6 +103,7 @@ struct OverviewView: View {
                             endPoint: .trailing
                         )
                     )
+                    .blurredValue(viewModel.privacyModeManager.shouldBlurValues)
                 
                 if let lastUpdated = viewModel.lastUpdated {
                     Text("Last updated: \(lastUpdated, formatter: itemFormatter)")
@@ -277,6 +287,7 @@ struct OverviewView: View {
                 Text("\(viewModel.sum(for: riskCategory), specifier: "%.2f") \(viewModel.selectedCurrency.rawValue)")
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
+                    .blurredValue(viewModel.privacyModeManager.shouldBlurValues)
                 Text("\(viewModel.percentage(for: riskCategory), specifier: "%.1f")%")
                     .font(.caption)
                     .fontWeight(.medium)
@@ -313,6 +324,7 @@ struct OverviewView: View {
                 Text("\(viewModel.sum(for: assetClass), specifier: "%.2f") \(viewModel.selectedCurrency.rawValue)")
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
+                    .blurredValue(viewModel.privacyModeManager.shouldBlurValues)
                 Text("\(viewModel.percentage(for: assetClass), specifier: "%.1f")%")
                     .font(.caption)
                     .fontWeight(.medium)
@@ -329,28 +341,25 @@ struct OverviewView: View {
     private func assetRow(_ asset: Asset) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(asset.name)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                    
-                    // Only show category icon when viewing by Asset Class
-                    if viewMode == .assetClass {
-                        Image(systemName: asset.category.iconName)
-                            .font(.caption)
-                            .foregroundColor(colorForCategory(asset.category))
-                            .help(asset.category.rawValue)
-                    }
-                }
+                Text(asset.name)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                
                 Text("\(formatAssetAmount(asset.amount)) units")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .blurredValue(viewModel.privacyModeManager.shouldBlurValues)
+                
+                Text("Risk Class: \(asset.category.rawValue)")
+                    .font(.caption)
+                    .foregroundColor(colorForCategory(asset.category))
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
                 Text("\(asset.sum, specifier: "%.2f") \(viewModel.selectedCurrency.rawValue)")
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
+                    .blurredValue(viewModel.privacyModeManager.shouldBlurValues)
                 Text("\(asset.currentPrice ?? 0, specifier: "%.2f") \(viewModel.selectedCurrency.rawValue)")
                     .font(.caption)
                     .foregroundColor(.secondary)
