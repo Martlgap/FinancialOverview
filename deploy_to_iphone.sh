@@ -25,23 +25,11 @@ if [ $? -eq 0 ]; then
     # Install the app on the connected iPhone
     xcrun devicectl device install app \
         --device $DEVICE_ID \
-<<<<<<< HEAD
-<<<<<<< HEAD
-        "/Users/martinknoche/Library/Developer/Xcode/DerivedData/PortfolioOverview-axycpsnnawmogygxvgpnjlrywwqw/Build/Products/Debug-iphoneos/PortfolioOverview.app"
-    
-    if [ $? -eq 0 ]; then
-        echo "🎉 App successfully deployed to iPhone!"
-        echo "💡 You can now launch 'PortfolioOverview' on your iPhone"
-=======
-        "/Users/martinknoche/Library/Developer/Xcode/DerivedData/FinancialOverview-axycpsnnawmogygxvgpnjlrywwqw/Build/Products/Debug-iphoneos/FinancialOverview.app"
-=======
         "$BUILD_DIR/FinancialOverview.app"
->>>>>>> f056bee (Nice and clean state)
     
     if [ $? -eq 0 ]; then
         echo "🎉 App successfully deployed to iPhone!"
         echo "💡 You can now launch 'FinancialOverview' on your iPhone"
->>>>>>> fdb7472 (Working State)
     else
         echo "❌ Failed to install app on iPhone"
         exit 1
@@ -49,8 +37,4 @@ if [ $? -eq 0 ]; then
 else
     echo "❌ Build failed"
     exit 1
-<<<<<<< HEAD
 fi
-=======
-fi 
->>>>>>> fdb7472 (Working State)
