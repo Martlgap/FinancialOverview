@@ -35,6 +35,26 @@ class AssetViewModel {
     var totalSum: Double {
         assets.reduce(0) { $0 + $1.sum }
     }
+    
+    var totalValue: Double {
+        totalSum // Alias for compatibility with PlanManager
+    }
+    
+    var assetClassDistribution: [AssetClass: Double] {
+        var distribution: [AssetClass: Double] = [:]
+        for assetClass in AssetClass.allCases {
+            distribution[assetClass] = percentage(for: assetClass)
+        }
+        return distribution
+    }
+    
+    var riskCategoryDistribution: [AssetCategory: Double] {
+        var distribution: [AssetCategory: Double] = [:]
+        for category in AssetCategory.allCases {
+            distribution[category] = percentage(for: category)
+        }
+        return distribution
+    }
 
     func assets(for assetClass: AssetClass) -> [Asset] {
         assets.filter { $0.assetClass == assetClass }
