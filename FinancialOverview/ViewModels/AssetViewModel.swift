@@ -38,14 +38,27 @@ class AssetViewModel {
     func assets(for assetClass: AssetClass) -> [Asset] {
         assets.filter { $0.assetClass == assetClass }
     }
+    
+    func assets(for category: AssetCategory) -> [Asset] {
+        assets.filter { $0.category == category }
+    }
 
     func sum(for assetClass: AssetClass) -> Double {
         assets(for: assetClass).reduce(0) { $0 + $1.sum }
+    }
+    
+    func sum(for category: AssetCategory) -> Double {
+        assets(for: category).reduce(0) { $0 + $1.sum }
     }
 
     func percentage(for assetClass: AssetClass) -> Double {
         let classSum = sum(for: assetClass)
         return totalSum > 0 ? (classSum / totalSum) * 100 : 0
+    }
+    
+    func percentage(for category: AssetCategory) -> Double {
+        let categorySum = sum(for: category)
+        return totalSum > 0 ? (categorySum / totalSum) * 100 : 0
     }
     
     func percentage(for asset: Asset) -> Double {
@@ -129,21 +142,21 @@ class AssetViewModel {
     
     private func loadSampleData() {
         self.assets = [
-            Asset(assetClass: .cryptocurrencies, code: "BTC", name: "Bitcoin", amount: 0.5),
-            Asset(assetClass: .cryptocurrencies, code: "ETH", name: "Ethereum", amount: 10),
-            Asset(assetClass: .stocks, code: "US0378331005", name: "Apple", amount: 100),
-            Asset(assetClass: .etfs, code: "IE00B5BMR087", name: "iShares Core MSCI World", amount: 50),
-            Asset(assetClass: .rawMaterials, code: "XAU", name: "Gold", amount: 2)
+            Asset(assetClass: .cryptocurrencies, code: "BTC", name: "Bitcoin", amount: 0.5, category: .highRisk),
+            Asset(assetClass: .cryptocurrencies, code: "ETH", name: "Ethereum", amount: 10, category: .highRisk),
+            Asset(assetClass: .stocks, code: "US0378331005", name: "Apple", amount: 100, category: .mediumRisk),
+            Asset(assetClass: .etfs, code: "IE00B5BMR087", name: "iShares Core MSCI World", amount: 50, category: .lowRisk),
+            Asset(assetClass: .rawMaterials, code: "XAU", name: "Gold", amount: 2, category: .lowRisk)
         ]
     }
     
     // MARK: - CSV Import/Export
     
     func exportToCSV() -> String {
-        var csvString = "Asset Class,Code,Name,Amount\n"
+        var csvString = "Asset Class,Code,Name,Amount,Category\n"
         
         for asset in assets {
-            let line = "\"\(asset.assetClass.rawValue)\",\"\(asset.code)\",\"\(asset.name)\",\(asset.amount)\n"
+            let line = "\"\(asset.assetClass.rawValue)\",\"\(asset.code)\",\"\(asset.name)\",\(asset.amount),\"\(asset.category.rawValue)\"\n"
             csvString += line
         }
         
@@ -172,8 +185,14 @@ class AssetViewModel {
             let name = components[2].trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "\""))
             let amountString = components[3].trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "\""))
             
+            // Handle category (optional field for backward compatibility)
+            let categoryString = components.count > 4 ? components[4].trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "\"")) : ""
+            
             // Try case-insensitive matching for asset class
             let assetClass = AssetClass.allCases.first { $0.rawValue.lowercased() == assetClassString.lowercased() }
+            
+            // Try case-insensitive matching for category, default to medium risk if not specified
+            let category = AssetCategory.allCases.first { $0.rawValue.lowercased() == categoryString.lowercased() } ?? .mediumRisk
             
             guard let foundAssetClass = assetClass,
                   let amount = Double(amountString) else {
@@ -183,10 +202,10 @@ class AssetViewModel {
                 continue
             }
             
-            // Create asset without current price - it will be fetched when refreshData is called
-            let asset = Asset(assetClass: foundAssetClass, code: code, name: name, amount: amount)
+            // Create asset with category (defaults to medium risk if not specified)
+            let asset = Asset(assetClass: foundAssetClass, code: code, name: name, amount: amount, category: category)
             importedAssets.append(asset)
-            print("Successfully parsed asset: \(name) (\(code))")
+            print("Successfully parsed asset: \(name) (\(code)) with category: \(category.rawValue)")
         }
         
         print("Parsed \(importedAssets.count) assets from CSV")

@@ -19,6 +19,12 @@ struct ContentView: View {
             UITabBar.appearance().barTintColor = .black
         }
         .preferredColorScheme(.dark)
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            // Refresh asset values when app comes to foreground
+            Task {
+                await assetViewModel.refreshData()
+            }
+        }
     }
 }
 

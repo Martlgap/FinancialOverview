@@ -7,6 +7,7 @@ struct Asset: Identifiable, Codable, Hashable {
     var name: String
     var amount: Double
     var currentPrice: Double?
+    var category: AssetCategory
     
     var sum: Double {
         return amount * (currentPrice ?? 0)
