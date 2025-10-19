@@ -17,6 +17,7 @@ class AssetViewModel {
         }
     }
     var lastUpdated: Date?
+    var privacyModeManager = PrivacyModeManager()
 
     private let apiService = APIService()
     private let userDefaultsKey = "savedAssets"
@@ -153,7 +154,7 @@ class AssetViewModel {
     // MARK: - CSV Import/Export
     
     func exportToCSV() -> String {
-        var csvString = "Asset Class,Code,Name,Amount,Category\n"
+        var csvString = "Asset Class,Code,Name,Amount,Risk Class\n"
         
         for asset in assets {
             let line = "\"\(asset.assetClass.rawValue)\",\"\(asset.code)\",\"\(asset.name)\",\(asset.amount),\"\(asset.category.rawValue)\"\n"
@@ -191,8 +192,18 @@ class AssetViewModel {
             // Try case-insensitive matching for asset class
             let assetClass = AssetClass.allCases.first { $0.rawValue.lowercased() == assetClassString.lowercased() }
             
-            // Try case-insensitive matching for category, default to medium risk if not specified
-            let category = AssetCategory.allCases.first { $0.rawValue.lowercased() == categoryString.lowercased() } ?? .mediumRisk
+            // Try case-insensitive matching for category, handling both old format (with "Risk") and new format (without "Risk")
+            var category: AssetCategory = .mediumRisk // default
+            if !categoryString.isEmpty {
+                // First try exact match with new format
+                if let exactMatch = AssetCategory.allCases.first(where: { $0.rawValue.lowercased() == categoryString.lowercased() }) {
+                    category = exactMatch
+                } else {
+                    // Try legacy format matching (e.g., "High Risk" -> "High")
+                    let cleanedCategoryString = categoryString.replacingOccurrences(of: " Risk", with: "")
+                    category = AssetCategory.allCases.first { $0.rawValue.lowercased() == cleanedCategoryString.lowercased() } ?? .mediumRisk
+                }
+            }
             
             guard let foundAssetClass = assetClass,
                   let amount = Double(amountString) else {
@@ -211,21 +222,13 @@ class AssetViewModel {
         print("Parsed \(importedAssets.count) assets from CSV")
         
         if !importedAssets.isEmpty {
-            print("Processing imported assets with duplicate checking...")
-            // Process each imported asset using the same logic as addAsset
-            for importedAsset in importedAssets {
-                if let existingIndex = assets.firstIndex(where: { $0.code == importedAsset.code && $0.assetClass == importedAsset.assetClass }) {
-                    // Asset already exists, add the amount to the existing asset
-                    assets[existingIndex].amount += importedAsset.amount
-                    print("Updated existing asset \(importedAsset.name) (\(importedAsset.code)): added \(importedAsset.amount), new total: \(assets[existingIndex].amount)")
-                } else {
-                    // Asset doesn't exist, add it as a new asset
-                    assets.append(importedAsset)
-                    print("Added new asset \(importedAsset.name) (\(importedAsset.code)) with amount: \(importedAsset.amount)")
-                }
+            print("Overwriting all existing assets with imported data...")
+            // Replace all existing assets with the imported ones (overwrite, not merge)
+            self.assets = importedAssets
+            print("Assets overwritten. New count: \(self.assets.count)")
+            for asset in importedAssets {
+                print("Imported asset: \(asset.name) (\(asset.code)) with amount: \(asset.amount)")
             }
-            saveAssets() // Explicitly save to ensure persistence
-            print("Assets processed. New count: \(self.assets.count)")
             Task {
                 await refreshData()
             }

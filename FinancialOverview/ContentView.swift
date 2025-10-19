@@ -25,6 +25,10 @@ struct ContentView: View {
                 await assetViewModel.refreshData()
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            // Hide values when app goes to background if privacy mode is enabled
+            assetViewModel.privacyModeManager.hideValuesIfNeeded()
+        }
     }
 }
 

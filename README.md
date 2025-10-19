@@ -31,7 +31,7 @@ A SwiftUI-based iOS portfolio tracking application that helps users manage and m
 - **Local persistence** using UserDefaults with JSON encoding
 - **MVVM architecture** with Observable view models
 - **Real-time updates** using async/await patterns
-- **Automatic data merging** for duplicate assets during import
+- **Complete asset replacement** during import (overwrites existing data)
 - **Sample data** provided for new users
 
 ### 💰 Asset Management
@@ -54,7 +54,7 @@ A SwiftUI-based iOS portfolio tracking application that helps users manage and m
 ### 📊 Data Import/Export
 - **CSV Export** with proper formatting and quotes
 - **CSV Import** with validation and error handling
-- **Duplicate handling** during import (merges quantities)
+- **Asset replacement** during import (overwrites all existing assets)
 - **File picker integration** for iOS document handling
 
 ### 🛠️ Technical Implementation

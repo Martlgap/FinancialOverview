@@ -12,6 +12,16 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
+                Section(header: Text("Privacy")) {
+                    Toggle("Privacy Mode", isOn: $viewModel.privacyModeManager.isPrivacyModeEnabled)
+                    
+                    if viewModel.privacyModeManager.isPrivacyModeEnabled {
+                        Text("When enabled, asset values will be hidden by default and can be temporarily revealed using the eye icon next to the + button.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
                 Section(header: Text("Currency")) {
                     Picker("Select Currency", selection: $viewModel.selectedCurrency) {
                         ForEach(Currency.allCases, id: \.self) { currency in
@@ -46,6 +56,20 @@ struct SettingsView: View {
                         Text("Version")
                         Spacer()
                         Text("1.0.0")
+                    }
+                    
+                    HStack {
+                        Text("Developer")
+                        Spacer()
+                        Text("Martin Knoche")
+                    }
+                    
+                    HStack {
+                        Text("Contact")
+                        Spacer()
+                        Text("financialoverview@martinknoche.net")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
