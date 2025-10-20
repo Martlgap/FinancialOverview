@@ -25,9 +25,6 @@ class AssetViewModel {
 
     init() {
         loadAssets()
-        if assets.isEmpty {
-            loadSampleData()
-        }
         Task {
             await refreshData()
         }
@@ -161,16 +158,6 @@ class AssetViewModel {
         } else {
             print("No saved assets found in UserDefaults")
         }
-    }
-    
-    private func loadSampleData() {
-        self.assets = [
-            Asset(assetClass: .cryptocurrencies, code: "BTC", name: "Bitcoin", amount: 0.5, category: .highRisk),
-            Asset(assetClass: .cryptocurrencies, code: "ETH", name: "Ethereum", amount: 10, category: .highRisk),
-            Asset(assetClass: .stocks, code: "US0378331005", name: "Apple", amount: 100, category: .mediumRisk),
-            Asset(assetClass: .etfs, code: "IE00B5BMR087", name: "iShares Core MSCI World", amount: 50, category: .lowRisk),
-            Asset(assetClass: .rawMaterials, code: "XAU", name: "Gold", amount: 2, category: .lowRisk)
-        ]
     }
     
     // MARK: - CSV Import/Export
