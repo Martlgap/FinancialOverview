@@ -56,12 +56,17 @@ class PlanManager: ObservableObject {
         case .assetClass:
             // Calculate current asset class distribution
             let assetDistribution = assetViewModel.assetClassDistribution
-            for assetClass in AssetClass.allCases {
+            for assetClass in assetViewModel.assetClassSettings.enabledClasses {
                 let percentage = assetDistribution[assetClass] ?? 0.0
                 currentDistribution[assetClass.rawValue] = percentage
             }
         }
         
-        return PlanAnalysis(plan: plan, currentDistribution: currentDistribution, totalValue: totalValue)
+        return PlanAnalysis(
+            plan: plan, 
+            currentDistribution: currentDistribution, 
+            totalValue: totalValue,
+            enabledAssetClasses: plan.targetType == .assetClass ? assetViewModel.assetClassSettings.enabledClasses : nil
+        )
     }
 }

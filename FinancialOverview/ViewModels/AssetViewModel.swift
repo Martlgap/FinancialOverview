@@ -18,6 +18,7 @@ class AssetViewModel {
     }
     var lastUpdated: Date?
     var privacyModeManager = PrivacyModeManager()
+    var assetClassSettings = AssetClassSettingsManager()
 
     private let apiService = APIService()
     private let userDefaultsKey = "savedAssets"
@@ -33,7 +34,7 @@ class AssetViewModel {
     }
 
     var totalSum: Double {
-        assets.reduce(0) { $0 + $1.sum }
+        assets.filter { assetClassSettings.isEnabled($0.assetClass) }.reduce(0) { $0 + $1.sum }
     }
     
     var totalValue: Double {
@@ -42,7 +43,7 @@ class AssetViewModel {
     
     var assetClassDistribution: [AssetClass: Double] {
         var distribution: [AssetClass: Double] = [:]
-        for assetClass in AssetClass.allCases {
+        for assetClass in assetClassSettings.enabledClasses {
             distribution[assetClass] = percentage(for: assetClass)
         }
         return distribution
@@ -57,11 +58,12 @@ class AssetViewModel {
     }
 
     func assets(for assetClass: AssetClass) -> [Asset] {
-        assets.filter { $0.assetClass == assetClass }
+        guard assetClassSettings.isEnabled(assetClass) else { return [] }
+        return assets.filter { $0.assetClass == assetClass }
     }
     
     func assets(for category: AssetCategory) -> [Asset] {
-        assets.filter { $0.category == category }
+        assets.filter { $0.category == category && assetClassSettings.isEnabled($0.assetClass) }
     }
 
     func sum(for assetClass: AssetClass) -> Double {

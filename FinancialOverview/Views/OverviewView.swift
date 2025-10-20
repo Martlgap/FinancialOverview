@@ -47,7 +47,7 @@ struct OverviewView: View {
                     
                     // Display sections based on selected mode
                     if viewMode == .assetClass {
-                        ForEach(AssetClass.allCases) { assetClass in
+                        ForEach(viewModel.assetClassSettings.enabledClasses) { assetClass in
                             assetClassSection(assetClass)
                         }
                     } else {

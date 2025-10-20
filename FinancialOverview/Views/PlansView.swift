@@ -40,7 +40,7 @@ struct PlansView: View {
                 }
             }
             .sheet(isPresented: $showingAddPlan) {
-                AddPlanView(planManager: planManager)
+                AddPlanView(planManager: planManager, viewModel: viewModel)
             }
             .sheet(item: $selectedPlan) { plan in
                 PlanAnalysisView(plan: plan, viewModel: viewModel, planManager: planManager)

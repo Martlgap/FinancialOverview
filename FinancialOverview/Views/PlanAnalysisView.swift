@@ -63,7 +63,7 @@ struct PlanAnalysisView: View {
                 }
             }
             .sheet(isPresented: $showingEditPlan) {
-                AddPlanView(planManager: planManager, editingPlan: plan)
+                AddPlanView(planManager: planManager, viewModel: viewModel, editingPlan: plan)
             }
             .alert("Delete Plan", isPresented: $showingDeleteAlert) {
                 Button("Delete", role: .destructive) {
