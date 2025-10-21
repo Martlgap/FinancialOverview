@@ -1,1 +1,10 @@
-swiftc -parse-as-library APIServiceTests.swift FinancialOverview/Services/APIService.swift FinancialOverview/Models/Asset.swift FinancialOverview/Models/AssetClass.swift -o test_runner && ./test_runner
+#!/bin/bash
+
+echo "Running API Service Tests..."
+echo "=========================="
+
+swift APIServiceTests.swift
+
+echo ""
+echo "=========================="
+echo "Tests completed."
