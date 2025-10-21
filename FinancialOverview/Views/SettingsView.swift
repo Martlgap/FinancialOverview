@@ -31,6 +31,31 @@ struct SettingsView: View {
                     .pickerStyle(SegmentedPickerStyle())
                 }
                 
+                Section(header: Text("Asset Classes")) {
+                    Text("Select which asset classes to display in the overview and include in calculations.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    ForEach(AssetClass.allCases, id: \.self) { assetClass in
+                        HStack {
+                            Image(systemName: iconForAssetClass(assetClass))
+                                .foregroundColor(.cyan)
+                                .frame(width: 20)
+                            
+                            Text(assetClass.rawValue)
+                            
+                            Spacer()
+                            
+                            Toggle("", isOn: Binding(
+                                get: { viewModel.assetClassSettings.isEnabled(assetClass) },
+                                set: { isEnabled in
+                                    viewModel.assetClassSettings.setEnabled(assetClass, enabled: isEnabled)
+                                }
+                            ))
+                        }
+                    }
+                }
+                
                 Section(header: Text("Data Management")) {
                     Button(action: {
                         showingExportPicker = true
@@ -143,6 +168,19 @@ struct SettingsView: View {
         case .failure(let error):
             alertMessage = "Failed to export assets: \(error.localizedDescription)"
             showingExportAlert = true
+        }
+    }
+    
+    private func iconForAssetClass(_ assetClass: AssetClass) -> String {
+        switch assetClass {
+        case .rawMaterials:
+            return "cube.fill"
+        case .cryptocurrencies:
+            return "bitcoinsign.circle.fill"
+        case .stocks:
+            return "chart.line.uptrend.xyaxis"
+        case .etfs:
+            return "chart.pie.fill"
         }
     }
 }

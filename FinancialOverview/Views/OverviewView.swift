@@ -39,53 +39,94 @@ struct OverviewView: View {
                 )
                 .ignoresSafeArea()
                 
-                List {
-                    totalSumSection
-                    
-                    // Toggle section
-                    viewModeToggleSection
-                    
-                    // Display sections based on selected mode
-                    if viewMode == .assetClass {
-                        ForEach(AssetClass.allCases) { assetClass in
-                            assetClassSection(assetClass)
-                        }
-                    } else {
-                        ForEach(AssetCategory.allCases) { riskCategory in
-                            riskCategorySection(riskCategory)
-                        }
-                    }
-                }
-                .scrollContentBackground(.hidden)
-                .navigationTitle("Portfolio")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        if viewModel.privacyModeManager.isPrivacyModeEnabled {
-                            Button(action: {
-                                viewModel.privacyModeManager.toggleValuesVisibility()
-                            }) {
-                                Image(systemName: viewModel.privacyModeManager.isValuesCurrentlyHidden ? "eye.slash" : "eye")
-                                    .foregroundColor(.secondary)
+                if viewModel.assets.isEmpty {
+                    emptyStateView
+                } else {
+                    List {
+                        totalSumSection
+                        
+                        // Toggle section
+                        viewModeToggleSection
+                        
+                        // Display sections based on selected mode
+                        if viewMode == .assetClass {
+                            ForEach(viewModel.assetClassSettings.enabledClasses) { assetClass in
+                                assetClassSection(assetClass)
+                            }
+                        } else {
+                            ForEach(AssetCategory.allCases) { riskCategory in
+                                riskCategorySection(riskCategory)
                             }
                         }
-                        
+                    }
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .navigationTitle("Portfolio")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    if viewModel.privacyModeManager.isPrivacyModeEnabled {
                         Button(action: {
-                            showingNewAssetView = true
+                            viewModel.privacyModeManager.toggleValuesVisibility()
                         }) {
-                            Image(systemName: "plus")
+                            Image(systemName: viewModel.privacyModeManager.isValuesCurrentlyHidden ? "eye.slash" : "eye")
+                                .foregroundColor(.secondary)
                         }
                     }
+                    
+                    Button(action: {
+                        showingNewAssetView = true
+                    }) {
+                        Image(systemName: "plus")
+                    }
                 }
-                .refreshable {
-                    await viewModel.refreshData()
-                }
-                .sheet(item: $selectedAsset) { asset in
-                    AssetEditView(viewModel: viewModel, asset: asset)
-                }
-                .sheet(isPresented: $showingNewAssetView) {
-                    AssetEditView(viewModel: viewModel, asset: nil)
-                }
+            }
+            .refreshable {
+                await viewModel.refreshData()
+            }
+            .sheet(item: $selectedAsset) { asset in
+                AssetEditView(viewModel: viewModel, asset: asset)
+            }
+            .sheet(isPresented: $showingNewAssetView) {
+                AssetEditView(viewModel: viewModel, asset: nil)
+            }
+        }
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "chart.line.uptrend.xyaxis.circle")
+                .font(.system(size: 60))
+                .foregroundColor(.secondary.opacity(0.6))
+            
+            Text("No Assets Yet")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            
+            Text("Start building your portfolio by adding your first asset")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            
+            Button {
+                showingNewAssetView = true
+            } label: {
+                Label("Add Asset", systemImage: "plus")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            colors: [.blue, .cyan],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
             }
         }
     }

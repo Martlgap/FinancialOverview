@@ -18,22 +18,20 @@ class AssetViewModel {
     }
     var lastUpdated: Date?
     var privacyModeManager = PrivacyModeManager()
+    var assetClassSettings = AssetClassSettingsManager()
 
     private let apiService = APIService()
     private let userDefaultsKey = "savedAssets"
 
     init() {
         loadAssets()
-        if assets.isEmpty {
-            loadSampleData()
-        }
         Task {
             await refreshData()
         }
     }
 
     var totalSum: Double {
-        assets.reduce(0) { $0 + $1.sum }
+        assets.filter { assetClassSettings.isEnabled($0.assetClass) }.reduce(0) { $0 + $1.sum }
     }
     
     var totalValue: Double {
@@ -42,7 +40,7 @@ class AssetViewModel {
     
     var assetClassDistribution: [AssetClass: Double] {
         var distribution: [AssetClass: Double] = [:]
-        for assetClass in AssetClass.allCases {
+        for assetClass in assetClassSettings.enabledClasses {
             distribution[assetClass] = percentage(for: assetClass)
         }
         return distribution
@@ -57,11 +55,12 @@ class AssetViewModel {
     }
 
     func assets(for assetClass: AssetClass) -> [Asset] {
-        assets.filter { $0.assetClass == assetClass }
+        guard assetClassSettings.isEnabled(assetClass) else { return [] }
+        return assets.filter { $0.assetClass == assetClass }
     }
     
     func assets(for category: AssetCategory) -> [Asset] {
-        assets.filter { $0.category == category }
+        assets.filter { $0.category == category && assetClassSettings.isEnabled($0.assetClass) }
     }
 
     func sum(for assetClass: AssetClass) -> Double {
@@ -159,16 +158,6 @@ class AssetViewModel {
         } else {
             print("No saved assets found in UserDefaults")
         }
-    }
-    
-    private func loadSampleData() {
-        self.assets = [
-            Asset(assetClass: .cryptocurrencies, code: "BTC", name: "Bitcoin", amount: 0.5, category: .highRisk),
-            Asset(assetClass: .cryptocurrencies, code: "ETH", name: "Ethereum", amount: 10, category: .highRisk),
-            Asset(assetClass: .stocks, code: "US0378331005", name: "Apple", amount: 100, category: .mediumRisk),
-            Asset(assetClass: .etfs, code: "IE00B5BMR087", name: "iShares Core MSCI World", amount: 50, category: .lowRisk),
-            Asset(assetClass: .rawMaterials, code: "XAU", name: "Gold", amount: 2, category: .lowRisk)
-        ]
     }
     
     // MARK: - CSV Import/Export

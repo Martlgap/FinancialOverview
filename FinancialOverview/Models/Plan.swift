@@ -26,7 +26,7 @@ struct Plan: Codable, Identifiable {
     let createdAt: Date
     var modifiedAt: Date
     
-    init(name: String, targetType: PlanTargetType) {
+    init(name: String, targetType: PlanTargetType, enabledAssetClasses: [AssetClass]? = nil) {
         self.name = name
         self.targetType = targetType
         self.createdAt = Date()
@@ -39,7 +39,8 @@ struct Plan: Codable, Identifiable {
                 PlanDistribution(key: category.rawValue, percentage: 0.0)
             }
         case .assetClass:
-            self.distributions = AssetClass.allCases.map { assetClass in
+            let assetClasses = enabledAssetClasses ?? AssetClass.allCases
+            self.distributions = assetClasses.map { assetClass in
                 PlanDistribution(key: assetClass.rawValue, percentage: 0.0)
             }
         }
@@ -51,6 +52,16 @@ struct Plan: Codable, Identifiable {
     
     var isValid: Bool {
         abs(totalPercentage - 100.0) < 0.01
+    }
+    
+    func enabledDistributions(using enabledAssetClasses: [AssetClass]) -> [PlanDistribution] {
+        switch targetType {
+        case .riskClass:
+            return distributions // Risk class distributions are always valid
+        case .assetClass:
+            let enabledClassNames = Set(enabledAssetClasses.map { $0.rawValue })
+            return distributions.filter { enabledClassNames.contains($0.key) }
+        }
     }
     
     mutating func updateDistribution(for key: String, percentage: Double) {
@@ -85,13 +96,18 @@ struct PlanAnalysis {
         discrepancies.filter { $0.discrepancyValue > 0 }.reduce(0) { $0 + $1.discrepancyValue }
     }
     
-    init(plan: Plan, currentDistribution: [String: Double], totalValue: Double) {
+    init(plan: Plan, currentDistribution: [String: Double], totalValue: Double, enabledAssetClasses: [AssetClass]? = nil) {
         self.plan = plan
         self.totalPortfolioValue = totalValue
         
+        // Use only enabled distributions for calculations
+        let distributionsToUse = enabledAssetClasses != nil ? 
+            plan.enabledDistributions(using: enabledAssetClasses!) : 
+            plan.distributions
+        
         // Calculate discrepancies with corrected rebalancing logic
         let (discrepancies, _) = Self.calculateCorrectRebalancing(
-            plan: plan,
+            distributions: distributionsToUse,
             currentDistribution: currentDistribution,
             totalValue: totalValue
         )
@@ -104,14 +120,14 @@ struct PlanAnalysis {
     /// This solves for the minimum additional investments needed to get underfunded categories
     /// as close as possible to their target percentages.
     private static func calculateCorrectRebalancing(
-        plan: Plan,
+        distributions: [PlanDistribution],
         currentDistribution: [String: Double],
         totalValue: Double
     ) -> ([PlanDiscrepancy], Double) {
         
         // Get current values for each category
         var currentValues: [String: Double] = [:]
-        for distribution in plan.distributions {
+        for distribution in distributions {
             let currentPercent = currentDistribution[distribution.key] ?? 0.0
             currentValues[distribution.key] = totalValue * (currentPercent / 100.0)
         }
@@ -120,7 +136,7 @@ struct PlanAnalysis {
         var underfundedCategories: [(key: String, currentValue: Double, targetPercent: Double)] = []
         var overfundedValue: Double = 0.0
         
-        for distribution in plan.distributions {
+        for distribution in distributions {
             let key = distribution.key
             let currentValue = currentValues[key] ?? 0.0
             let currentPercent = currentDistribution[key] ?? 0.0
@@ -135,7 +151,7 @@ struct PlanAnalysis {
         
         // If no underfunded categories, no rebalancing needed
         guard !underfundedCategories.isEmpty else {
-            let discrepancies = plan.distributions.map { distribution in
+            let discrepancies = distributions.map { distribution in
                 let currentPercent = currentDistribution[distribution.key] ?? 0.0
                 let currentValue = currentValues[distribution.key] ?? 0.0
                 
@@ -197,14 +213,13 @@ struct PlanAnalysis {
         // Calculate discrepancies based on the new total value
         var discrepancies: [PlanDiscrepancy] = []
         
-        for distribution in plan.distributions {
+        for distribution in distributions {
             let currentPercent = currentDistribution[distribution.key] ?? 0.0
             let targetPercent = distribution.percentage
             let currentValue = currentValues[distribution.key] ?? 0.0
             
             let newTargetValue = newTotalValue * (targetPercent / 100.0)
             let discrepancyValue = max(0, newTargetValue - currentValue)
-            let discrepancyPercent = targetPercent - currentPercent
             
             // Calculate what the actual percentage will be after rebalancing
             let finalValue = currentValue + discrepancyValue

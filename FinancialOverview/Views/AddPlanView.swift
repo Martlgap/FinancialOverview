@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AddPlanView: View {
     @ObservedObject var planManager: PlanManager
+    let viewModel: AssetViewModel
     @Environment(\.dismiss) private var dismiss
     
     @State private var planName: String = ""
@@ -9,14 +10,15 @@ struct AddPlanView: View {
     @State private var plan: Plan
     @State private var showingValidationError = false
     
-    init(planManager: PlanManager, editingPlan: Plan? = nil) {
+    init(planManager: PlanManager, viewModel: AssetViewModel, editingPlan: Plan? = nil) {
         self.planManager = planManager
+        self.viewModel = viewModel
         if let existingPlan = editingPlan {
             self._plan = State(initialValue: existingPlan)
             self._planName = State(initialValue: existingPlan.name)
             self._selectedTargetType = State(initialValue: existingPlan.targetType)
         } else {
-            self._plan = State(initialValue: Plan(name: "", targetType: .riskClass))
+            self._plan = State(initialValue: Plan(name: "", targetType: .riskClass, enabledAssetClasses: viewModel.assetClassSettings.enabledClasses))
         }
     }
     
@@ -103,7 +105,7 @@ struct AddPlanView: View {
     }
     
     private func updatePlanTargetType(_ newType: PlanTargetType) {
-        var newPlan = Plan(name: planName, targetType: newType)
+        var newPlan = Plan(name: planName, targetType: newType, enabledAssetClasses: viewModel.assetClassSettings.enabledClasses)
         // Try to preserve any existing percentages that match
         for distribution in plan.distributions {
             if let matchingIndex = newPlan.distributions.firstIndex(where: { $0.key == distribution.key }) {
@@ -135,5 +137,5 @@ struct AddPlanView: View {
 }
 
 #Preview {
-    AddPlanView(planManager: PlanManager())
+    AddPlanView(planManager: PlanManager(), viewModel: AssetViewModel())
 }
